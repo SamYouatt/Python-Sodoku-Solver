@@ -120,7 +120,6 @@ def main():
                     board.clear()
                     key = None
 
-
         redrawWindow(win, board, playTime)
         pygame.display.update()
 
