@@ -1,21 +1,12 @@
 import pygame
 import time
+from random import sample
 pygame.font.init()
 
 class Grid:
-    board = [
-        [7, 8, 0, 4, 0, 0, 1, 2, 0],
-        [6, 0, 0, 0, 7, 5, 0, 0, 9],
-        [0, 0, 0, 6, 0, 1, 0, 7, 8],
-        [0, 0, 7, 0, 4, 0, 2, 6, 0],
-        [0, 0, 1, 0, 5, 0, 9, 3, 0],
-        [9, 0, 4, 0, 6, 0, 0, 0, 5],
-        [0, 7, 0, 3, 0, 0, 0, 1, 2],
-        [1, 2, 0, 0, 0, 7, 4, 0, 0],
-        [0, 4, 9, 2, 0, 6, 0, 0, 7]
-    ]
-
     def __init__(self, rows, cols, width, height, win):
+        board = createBoard(self, rows)
+        self.board = board
         self.rows = rows
         self.cols = cols
         self.width = width
@@ -101,7 +92,7 @@ class Grid:
                 self.squares[row][col].drawChange(self.win, True)
                 self.updateModel()
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(50)
 
                 if self.solve():
                     return True
@@ -111,7 +102,7 @@ class Grid:
                 self.updateModel()
                 self.squares[row][col].drawChange(self.win, False)
                 pygame.display.update()
-                pygame.time.delay(100)
+                pygame.time.delay(50)
 
         return False
             
@@ -168,6 +159,34 @@ class Square:
     
     def setTemp(self, val):
         self.temp = val
+
+def createBoard(self, rows):
+    base = int(rows**0.5)
+    side = base**2
+
+    def pattern(row, col):
+        return (base*(row%base)+row//base+col)%side
+
+    def shuffle(s):
+        return sample(s,len(s))
+
+    rBase = range(base)
+    rows = [g*base + r for g in shuffle(rBase) for r in shuffle(rBase)]
+    cols = [g*base + c for g in shuffle(rBase) for c in shuffle(rBase)]
+    nums = shuffle(range(1,base*base+1))
+
+    board = [[nums[pattern(r,c)] for c in cols] for r in rows]
+
+    # Remove squares        
+    # number of empty squares
+    squares = side*side
+    # lose a certain proportion of squares
+    empties = squares * 1 // 2
+
+    for p in sample(range(squares),empties):
+        board[p//side][p%side] = 0
+
+    return board
 
 def redrawWindow(win, board, time):
     win.fill((255,255,255))
