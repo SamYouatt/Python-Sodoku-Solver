@@ -1,3 +1,5 @@
+# Testing creation function
+
 from random import randint, sample
 
 def createBoard():
@@ -30,10 +32,3 @@ def createBoard():
     print(board)
     remove()
     print(board)
-
-
-    
-
-
-createBoard()
-print(int(9**0.5))
