@@ -87,6 +87,35 @@ class Grid:
                     return False
         return True
 
+    def solve(self):
+        find = findEmpty(self.model)
+        if not find:
+            return True
+        else:
+            row, col = find
+
+        for i in range(1, 10):
+            if valid(self.model, i, (row, col)):
+                self.model[row][col] = i
+                self.squares[row][col].set(i)
+                self.squares[row][col].drawChange(self.win, True)
+                self.updateModel()
+                pygame.display.update()
+                pygame.time.delay(100)
+
+                if self.solve():
+                    return True
+
+                self.model[row][col] = 0
+                self.squares[row][col].set(0)
+                self.updateModel()
+                self.squares[row][col].drawChange(self.win, False)
+                pygame.display.update()
+                pygame.time.delay(100)
+
+        return False
+            
+
 class Square:
     rows = 9
     cols = 9
@@ -117,13 +146,28 @@ class Square:
         if self.selected:
             pygame.draw.rect(win, (255, 0, 0), (x,y, gap, gap), 3)
 
+    def drawChange(self, win, green=True):
+        font = pygame.font.SysFont("arial", 40)
+
+        gap = self.width / 9
+        x = self.col * gap
+        y = self.row * gap
+
+        pygame.draw.rect(win, (255, 255, 255), (x, y, gap, gap), 0)
+
+        text = font.render(str(self.value), 1, (0, 0, 0))
+        win.blit(text, (x+(gap/2-text.get_width()/2), y+(gap/2-text.get_height()/2)))
+
+        if green:
+            pygame.draw.rect(win, (0, 255, 0), (x,y,gap,gap), 3)
+        else:
+            pygame.draw.rect(win, (255, 0, 0), (x,y,gap,gap), 3)
+
     def set(self, val):
         self.value = val
     
     def setTemp(self, val):
         self.temp = val
-
-
 
 def redrawWindow(win, board, time):
     win.fill((255,255,255))
@@ -143,6 +187,36 @@ def formatTime(secs):
     time = " " + str(minutes) + ":" + str(seconds)
 
     return time
+
+def findEmpty(board):
+    for i in range(len(board)):
+        for j in range(len(board[0])):
+            if board[i][j] == 0:
+                return (i, j)
+    return None
+
+def valid(board, num, pos):
+    # check the row
+    for i in range(len(board[0])):
+        if board[pos[0]][i] == num and pos[1] != i:
+            return False
+
+    # check the column
+    for i in range(len(board)):
+        if board[i][pos[1]] == num and pos[0] != i:
+            return False
+
+    # check box
+    box_x = pos[1] // 3
+    box_y = pos[0] // 3
+
+    for i in range(box_y*3, box_y*3 + 3):
+        for j in range(box_x*3, box_x*3 + 3):
+            if board[i][j] == num and (i,j) != pos:
+                return False
+    
+    return True
+        
 
 def main():
     win = pygame.display.set_mode((540,600))
@@ -179,6 +253,9 @@ def main():
                 if event.key == pygame.K_DELETE:
                     board.clear()
                     key = None
+
+                if event.key == pygame.K_SPACE:
+                    board.solve()
 
                 if event.key == pygame.K_RETURN:
                     i, j = board.selected
